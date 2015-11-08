@@ -130,6 +130,6 @@ void run(const int *code, int startingIndex, int dataSize, int trace) {
 }
 
 int main(int args, char **argv) {
-  run(code, 0, 0, 1);
+  run(code, 0, 0, argv[1] || 0); // pass 1 as first arg to see disassembly
   return 0;
 }
