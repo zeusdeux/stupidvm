@@ -1,2 +1,3 @@
 main: main.c
-	clang -Wall $^ -o $@
+	@echo "clang doing it's magic.."
+	@clang -Wall $^ -o $@
