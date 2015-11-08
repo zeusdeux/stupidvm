@@ -39,8 +39,8 @@ const int code[14] = {0, 1,
                       1,
                       8,
                       0, 200,
-                      3, 0,
-                      4, 0,
+                      3, 2,
+                      4, 2,
                       7,
                       9};
 
@@ -130,6 +130,6 @@ void run(const int *code, int startingIndex, int dataSize, int trace) {
 }
 
 int main(int args, char **argv) {
-  run(code, 0, 0, argv[1] || 0); // pass 1 as first arg to see disassembly
+  run(code, 0, 10, argv[1] || 0); // pass 1 as first arg to see disassembly
   return 0;
 }
