@@ -31,6 +31,11 @@ const char *ins[10] = {
   INUM 1
   INUM 2
   IADD
+  PRINTLN
+  INUM 200
+  ISTORE 2
+  ILOAD 2
+  PRINT
   HALT
 */
 
