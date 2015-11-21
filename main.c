@@ -31,9 +31,20 @@ const int code[] = {STUPIDVMMARKER,                                             
                     6, 12, 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 0, // STR 12 hello world\0
                     6, 4, 65, 66, 67, 0,                                            // STR 4 ABC\0
                     11,                                                             // SPRINTLN
-                    12};                                                            // HALT
+                    21};                                                            // HALT
+
+// branching test
+const int code2[] = {STUPIDVMMARKER,
+                     13,
+                     0,
+                     1, 2,
+                     1, 3,
+                     2,
+                     16, 10, 5,
+                     9,
+                     21};
 
 int main(int args, char **argv) {
-  run(code, 3, argv[1] || 0); // pass 1 as first arg to see disassembly
+  run(code2, 3, argv[1] || 0); // pass 1 as first arg to see disassembly
   return 0;
 }
