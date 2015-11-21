@@ -49,13 +49,16 @@ void run(const int *code, int startingAddr, int trace) {
   // int fp           = -1; // frame pointer
 
 
-  if (trace) fprintf(stderr, "No., of bytecodes: %d\n\n", noOfBytecodes);
+  if (trace) {
+    fprintf(stderr, "No., of bytecodes: %d\n\n", noOfBytecodes);
+    fprintf(stderr, "ADDR: OPCODE\tARGS\n--------------------\n");
+  }
 
   while (ip < noOfBytecodes) {
     int opcode = code[ip++]; // fetch
 
     if (trace) {
-      fprintf(stderr, "%04d: %s(%d) ", ip - 1, ins[opcode], opcode);
+      fprintf(stderr, "%04d: %s\t", ip - 1, ins[opcode]);
     }
 
     switch(opcode) { // decode opcode & execute
