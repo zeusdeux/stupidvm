@@ -33,16 +33,18 @@ const char *ins[] = {
   "HALT"      // HALT                                                               : Stop execution
 };
 
-void run(const int *code, int startingIndex, int dataSize, int trace) {
+void run(const int *code, int noOfBytecodes, int startingAddr, int dataSize, int trace) {
   int data[dataSize]; // arbitrary memory area
   void *stack[1000]; // runtime stack
   int sp = -1;
-  int ip = startingIndex;
+  int ip = startingAddr;
   // int fp = -1; // frame pointer
 
   int opcode = code[ip]; // fetch
 
-  while (1) {
+  if (trace) fprintf(stderr, "No., of bytecodes: %d", noOfBytecodes);
+
+  while (ip < noOfBytecodes) {
 
     if (trace) {
       fprintf(stderr, "%04d: %s(%d) ", ip, ins[opcode], opcode);
