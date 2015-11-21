@@ -18,11 +18,10 @@ run: main
 	@./main
 
 help:
-	@echo "Phony targets: run, runTrace, help"
-	@echo "Normal targets: main (deps: main.c vm.c)"
+	@echo "Phony targets: run, runTrace, help, clean"
 
 clean:
 	$(RM) ./*.o
 	$(RM) ./main
 
-.PHONY: run runTrace help clean
+.PHONY: all run runTrace help clean
