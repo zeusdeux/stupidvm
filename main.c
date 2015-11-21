@@ -35,13 +35,15 @@ const int code[] = {STUPIDVMMARKER,                                             
 
 // branching test
 const int code2[] = {STUPIDVMMARKER,
-                     13,
+                     22,
                      0,
                      1, 2,
                      1, 3,
                      2,
                      16, 10, 5,
                      9,
+                     6, 6, 68, 79, 78, 69, 33, 0,
+                     11,
                      21};
 
 int main(int args, char **argv) {
