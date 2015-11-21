@@ -29,7 +29,7 @@ const char *ins[] = {
   "HALT"      // HALT                                                       : Stop execution
 };
 
-int bail(const char *error) {
+void bail(const char *error) {
   fprintf(stderr, "%s\n", error);
   exit(1);
 }
