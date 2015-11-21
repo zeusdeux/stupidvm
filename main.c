@@ -6,10 +6,10 @@ Bytecode format:
 ----------------
 
 first 4 bytes = STUPIDVMMARKER
-next 4 bytes = total number bytecodes + 3 (for metadata stored in the first 12 bytes)
-next 4 bytes = address to begin execution at
+next 4 bytes  = total number bytecodes + 3 (for metadata stored in the first 12 bytes)
+next 4 bytes  = size of data segment
 
-from here onwards it's the actual bytecode
+From there onwards it's the actual bytecodes.
 
 */
 
@@ -37,14 +37,14 @@ const int code[] = {STUPIDVMMARKER,                                             
 const int code2[] = {STUPIDVMMARKER,
                      22,
                      0,
-                     1, 2,
-                     1, 3,
-                     2,
-                     16, 10, 5,
-                     9,
-                     6, 6, 68, 79, 78, 69, 33, 0,
-                     11,
-                     21};
+                     INUM, 2,
+                     INUM, 3,
+                     IADD,
+                     JMPLTE, 10, 5,
+                     IPRINTLN,
+                     STR, 6, 68, 79, 78, 69, 33, 0,
+                     SPRINTLN,
+                     HALT};
 
 int main(int args, char **argv) {
   run(code2, 3, argv[1] || 0); // pass 1 as first arg to see disassembly
