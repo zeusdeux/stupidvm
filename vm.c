@@ -3,53 +3,30 @@
 #include "vm.h"
 
 
-enum Instructions {
-  INUM = 1, // 1
-  IADD,     // 2
-  IMUL,     // 3
-  ISTORE,   // 4
-  ILOAD,    // 5
-  STR,      // 6
-  POP,      // 7
-  IPRINT,   // 8
-  IPRINTLN, // 9
-  SPRINT,   // 10
-  SPRINTLN, // 11
-  JMP,      // 12
-  JMPF,     // 13
-  JMPT,     // 14
-  JMPLT,    // 15
-  JMPLTE,   // 16
-  JMPGT,    // 17
-  JMPGTE,   // 18
-  JMPEQ,    // 19
-  JMPNE,    // 20
-  HALT      // 21
-};
-
+// TOS = top of stack
 const char *ins[] = {
   "",
-  "INUM",     // INUM <integer>                                                     : Pushes integer onto stack
-  "IADD",     // IADD                                                               : pops two from stack to add and pushes result back
-  "IMUL",     // IMUL                                                               : Same as IADD but multiplies the two popped values
-  "ISTORE",   // ISTORE <index>                                                     : Stores an integer into data segment at given index
-  "ILOAD",    // ILOAD <index>                                                      : Loads integer from data at given index
-  "STR",      // STR <string length + 1> <list of integers till \0 or 000 is found> : Pushes string onto stack (strlen + 1 is to accommodate \0 as end of string marker)
-  "POP",      // POP                                                                : Pops top of stack
-  "IPRINT",   // IPRINT                                                             : Prints top of stack. No trailing newline added
-  "IPRINTLN", // IPRINTLN                                                           : Same as PRINT but adds a trailing newline
-  "SPRINT",   // SPRINT                                                             : Prints top of stack as string
-  "SPRINTLN", // SPRINTLN                                                           : Prints top of stack as string with trailing newline
-  "JMP",
-  "JMPF",     // 13
-  "JMPT",     // 14
-  "JMPLT",    // 15
-  "JMPLTE",   // 16
-  "JMPGT",    // 17
-  "JMPGTE",   // 18
-  "JMPEQ",    // 19
-  "JMPNE",
-  "HALT"      // HALT                                                               : Stop execution
+  "INUM",     // INUM <integer>                                             : Pushes integer onto stack
+  "IADD",     // IADD                                                       : pops two from stack to add and pushes result back
+  "IMUL",     // IMUL                                                       : Same as IADD but multiplies the two popped values
+  "ISTORE",   // ISTORE <index>                                             : Stores an integer into data segment at given index
+  "ILOAD",    // ILOAD <index>                                              : Loads integer from data at given index
+  "STR",      // STR <str len + 1> <list of chars as ints + 0 (dec for \0)> : Pushes string onto stack (strlen + 1 is to accommodate \0 as end of string marker)
+  "POP",      // POP                                                        : Pops top of stack
+  "IPRINT",   // IPRINT                                                     : Prints top of stack. No trailing newline added
+  "IPRINTLN", // IPRINTLN                                                   : Same as PRINT but adds a trailing newline
+  "SPRINT",   // SPRINT                                                     : Prints top of stack as string
+  "SPRINTLN", // SPRINTLN                                                   : Prints top of stack as string with trailing newline
+  "JMP",      // JMP addr                                                   : Jump to instruction at address addr
+  "JMPF",     // JMPF addr                                                  : Jump to instruction at addr if TOS is FALSE. Doesn't consume TOS.
+  "JMPT",     // JMPT addr                                                  : Jump to instruction at addr if TOS is TRUE. Doesn't consume TOS.
+  "JMPLT",    // JMPLT val addr                                             : Jump to instruction at addr if TOS is lesser than val. Doesn't consume TOS.
+  "JMPLTE",   // JMPLTE val addr                                            : Jump to instruction at addr if TOS is lesser than or equal to val. Doesn't consume TOS.
+  "JMPGT",    // JMPGT val addr                                             : Jump to instruction at addr if TOS is greater than val. Doesn't consume TOS.
+  "JMPGTE",   // JMPGTE val addr                                            : Jump to instruction at addr if TOS is greater than or equal to val. Doesn't consume TOS.
+  "JMPEQ",    // JMPEQ val addr                                             : Jump to instruction at addr if TOS is equal to val. Doesn't consume TOS.
+  "JMPNE",    // JMPNE val addr                                             : Jump to instruction at addr if TOS is not equal to val. Doesn't consume TOS.
+  "HALT"      // HALT                                                       : Stop execution
 };
 
 int bail(const char *error) {
