@@ -33,12 +33,23 @@ const char *ins[] = {
   "HALT"      // HALT                                                               : Stop execution
 };
 
-void run(const int *code, int noOfBytecodes, int startingAddr, int dataSize, int trace) {
-  int data[dataSize]; // arbitrary memory area
-  void *stack[1000]; // runtime stack
-  int sp = -1;
-  int ip = startingAddr;
-  // int fp = -1; // frame pointer
+void run(const int *code, int startingAddr, int trace) {
+
+  if (code[0] != STUPIDVMMARKER) {
+    fprintf(stderr, "Invalid bytecode input");
+    exit(1);
+  }
+
+  int noOfBytecodes   = code[1];
+  int dataSegmentSize = code[2];
+
+  int data[dataSegmentSize];   // arbitrary memory area
+  void *stack[MAX_STACK_SIZE]; // runtime stack
+
+  int sp              = -1;
+  int ip              = startingAddr;
+  // int fp           = -1; // frame pointer
+
 
   int opcode = code[ip]; // fetch
 

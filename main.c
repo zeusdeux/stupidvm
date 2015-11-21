@@ -1,7 +1,22 @@
 #include "vm.h"
-#define ARRAYLEN(a) (sizeof(a)/sizeof(a[0]))
 
-const int code[] = {1, 2,                                                           // INUM 2
+/*
+
+Bytecode format:
+----------------
+
+first 4 bytes = STUPIDVMMARKER
+next 4 bytes = total number bytecodes + 3 (for metadata stored in the first 12 bytes)
+next 4 bytes = address to begin execution at
+
+from here onwards it's the actual bytecode
+
+*/
+
+const int code[] = {STUPIDVMMARKER,                                                 // AWESOME BYTECODE MARKER
+                    44,                                                             // No of bytecodes i.e., length of this array (includes the meta data at indices 0, 1 and 2)
+                    2,                                                              // size of data segment. It should be, atleast as big as the largest value given to a <type>STORE command
+                    1, 2,                                                           // INUM 2
                     1, 3,                                                           // INUM 3
                     2,                                                              // IADD
                     9,                                                              // IPRINTLN
@@ -19,7 +34,6 @@ const int code[] = {1, 2,                                                       
                     12};                                                            // HALT
 
 int main(int args, char **argv) {
-  //printf("what %lu", sizeof(code));
-  run(code, ARRAYLEN(code), 0, 10, argv[1] || 0); // pass 1 as first arg to see disassembly
+  run(code, 3, argv[1] || 0); // pass 1 as first arg to see disassembly
   return 0;
 }

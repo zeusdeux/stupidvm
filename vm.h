@@ -1,6 +1,9 @@
 #ifndef VM_H_
 #define VM_H_
 
-void run(const int *code, int noOfBytecodes, int startingAddr, int dataSize, int trace);
+#define STUPIDVMMARKER 0xB055BABE
+#define MAX_STACK_SIZE 1000
+
+void run(const int *code, int startingAddr, int trace);
 
 #endif
