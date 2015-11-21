@@ -78,7 +78,7 @@ void run(const int *code, int startingAddr, int trace) {
     int opcode = code[ip++]; // fetch
 
     if (trace) {
-      fprintf(stderr, "%04d: %s(%d) ", ip, ins[opcode], opcode);
+      fprintf(stderr, "%04d: %s(%d) ", ip - 1, ins[opcode], opcode);
     }
 
     switch(opcode) { // decode opcode & execute
