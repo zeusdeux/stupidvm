@@ -61,8 +61,7 @@ void run(const int *code, int startingAddr, int trace) {
       fprintf(stderr, "%04d: %s(%d) ", ip, ins[opcode], opcode);
     }
 
-    switch(opcode) { // decode
-      // execute INUM instruction
+    switch(opcode) { // decode opcode & execute
     case INUM: {
       stack[++sp] = (void *)&code[++ip];
       if (trace) fprintf(stderr, "%i @ %p", *((int *) stack[sp]), stack[sp]);
