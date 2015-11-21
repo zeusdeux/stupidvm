@@ -1,138 +1,21 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include "vm.h"
 
-enum Instructions {
-  INUM, // 0
-  IADD, // 1
-  IMUL, // 2
-  ISTORE, // 3
-  ILOAD, // 4
-  STR, // 5
-  POP, // 6
-  PRINT, // 7
-  PRINTLN, // 8
-  HALT // 9
-};
-
-const char *ins[10] = {
-  "INUM",
-  "IADD",
-  "IMUL",
-  "ISTORE",
-  "ILOAD",
-  "STR",
-  "POP",
-  "PRINT",
-  "PRINTLN",
-  "HALT"
-};
-
-/*
-  INUM 1
-  INUM 2
-  IADD
-  PRINTLN
-  INUM 200
-  ISTORE 2
-  ILOAD 2
-  PRINT
-  HALT
-*/
-
-const int code[14] = {0, 1,
-                      0, 2,
-                      1,
-                      8,
-                      0, 200,
-                      3, 2,
-                      4, 2,
-                      7,
-                      9};
-
-void run(const int *code, int startingIndex, int dataSize, int trace) {
-  int data[dataSize];
-  int stack[1000];
-  int sp = -1;
-  int ip = startingIndex;
-  // int fp = -1;
-
-  int opcode = code[ip]; // fetch
-
-  int x, y, idx;
-
-
-  while (1) {
-
-    if (trace) {
-      fprintf(stderr, "%04d: %s(%d) ", ip, ins[opcode], opcode);
-    }
-
-    switch(opcode) { // decode
-    case INUM: // execute INUM instruction
-      x = code[++ip];
-      stack[++sp] = x;
-      if (trace) fprintf(stderr, "%i", x);
-      break;
-
-    case IADD:
-      y = stack[sp--];
-      x = stack[sp--];
-      stack[++sp] = x + y;
-      break;
-
-    case IMUL:
-      y = stack[sp--];
-      x = stack[sp--];
-      stack[++sp] = x * y;
-      break;
-
-    case ISTORE:
-      idx = code[++ip];
-      data[idx] = stack[sp--];
-      if (trace) fprintf(stderr, "%i", idx);
-      break;
-
-    case ILOAD:
-      idx = code[++ip];
-      sp++;
-      stack[sp] = data[idx];
-      if (trace) fprintf(stderr, "%i", idx);
-      break;
-
-    case STR:
-      break;
-
-    case POP:
-      sp--;
-      break;
-
-    case PRINT:
-      if (trace) fprintf(stderr, "\n");
-      printf("%i", stack[sp--]);
-      fflush(stdout);
-      break;
-
-    case PRINTLN:
-      if (trace) fprintf(stderr, "\n");
-      printf("%i\n", stack[sp--]);
-      break;
-
-    case HALT:
-      if (trace) fprintf(stderr, "\n");
-      //printf("Top of stack (%i) is %i\n", sp, stack[sp]);
-      return;
-
-    default: fprintf(stderr, "Dafaq");
-      exit(1);
-    }
-
-    if (trace) fprintf(stderr, "\n");
-
-    // move to next opcode
-    opcode = code[++ip];
-
-  }
-}
+const int code[] = {1, 2,                                                           // INUM 2
+                    1, 3,                                                           // INUM 3
+                    2,                                                              // IADD
+                    9,                                                              // IPRINTLN
+                    1, 10,                                                          // INUM 10
+                    1, 4,                                                           // INUM 4
+                    2,                                                              // IADD
+                    9,                                                              // IPRINTLN
+                    1, 200,                                                         // INUM 200
+                    4, 2,                                                           // ISTORE 2
+                    5, 2,                                                           // ILOAD 2
+                    9,                                                              // IPRINTLN
+                    6, 12, 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 0, // STR 12 hello world\0
+                    6, 4, 65, 66, 67, 0,
+                    11,                                                             // SPRINTLN
+                    12};
 
 int main(int args, char **argv) {
   run(code, 0, 10, argv[1] || 0); // pass 1 as first arg to see disassembly
