@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "vm.h"
 
+
 enum Instructions {
   INUM = 1, // 1
   IADD,     // 2
@@ -14,7 +15,16 @@ enum Instructions {
   IPRINTLN, // 9
   SPRINT,   // 10
   SPRINTLN, // 11
-  HALT      // 12
+  JMP,      // 12
+  JMPF,     // 13
+  JMPT,     // 14
+  JMPLT,    // 15
+  JMPLTE,   // 16
+  JMPGT,    // 17
+  JMPGTE,   // 18
+  JMPEQ,    // 19
+  JMPNE,    // 20
+  HALT      // 21
 };
 
 const char *ins[] = {
@@ -30,15 +40,26 @@ const char *ins[] = {
   "IPRINTLN", // IPRINTLN                                                           : Same as PRINT but adds a trailing newline
   "SPRINT",   // SPRINT                                                             : Prints top of stack as string
   "SPRINTLN", // SPRINTLN                                                           : Prints top of stack as string with trailing newline
+  "JMP",
+  "JMPF",     // 13
+  "JMPT",     // 14
+  "JMPLT",    // 15
+  "JMPLTE",   // 16
+  "JMPGT",    // 17
+  "JMPGTE",   // 18
+  "JMPEQ",    // 19
+  "JMPNE",
   "HALT"      // HALT                                                               : Stop execution
 };
 
+int bail(const char *error) {
+  fprintf(stderr, "%s\n", error);
+  exit(1);
+}
+
 void run(const int *code, int startingAddr, int trace) {
 
-  if (code[0] != STUPIDVMMARKER) {
-    fprintf(stderr, "Invalid bytecode input");
-    exit(1);
-  }
+  if (code[0] != STUPIDVMMARKER) bail(EINVALIDBC);
 
   int noOfBytecodes   = code[1];
   int dataSegmentSize = code[2];
@@ -51,11 +72,10 @@ void run(const int *code, int startingAddr, int trace) {
   // int fp           = -1; // frame pointer
 
 
-  int opcode = code[ip]; // fetch
-
-  if (trace) fprintf(stderr, "No., of bytecodes: %d", noOfBytecodes);
+  if (trace) fprintf(stderr, "No., of bytecodes: %d\n\n", noOfBytecodes);
 
   while (ip < noOfBytecodes) {
+    int opcode = code[ip++]; // fetch
 
     if (trace) {
       fprintf(stderr, "%04d: %s(%d) ", ip, ins[opcode], opcode);
@@ -63,7 +83,7 @@ void run(const int *code, int startingAddr, int trace) {
 
     switch(opcode) { // decode opcode & execute
     case INUM: {
-      stack[++sp] = (void *)&code[++ip];
+      stack[++sp] = (void *)&code[ip++];
       if (trace) fprintf(stderr, "%i @ %p", *((int *) stack[sp]), stack[sp]);
       break;
     }
@@ -87,7 +107,7 @@ void run(const int *code, int startingAddr, int trace) {
     }
 
     case ISTORE: {
-      int idx = code[++ip];
+      int idx = code[ip++];
 
       data[idx] = *((int *)stack[sp--]);
       if (trace) fprintf(stderr, "%i", idx);
@@ -95,7 +115,7 @@ void run(const int *code, int startingAddr, int trace) {
     }
 
     case ILOAD: {
-      int idx = code[++ip];
+      int idx = code[ip++];
       int val = data[idx];
 
       stack[++sp] = &val;
@@ -104,12 +124,11 @@ void run(const int *code, int startingAddr, int trace) {
     }
 
     case STR: {
-      int lenOfStr = code[++ip];
-      char *str = (char *)malloc(lenOfStr * sizeof(char));
+      int lenOfStr = code[ip++];
+      char *str    = (char *)malloc(lenOfStr * sizeof(char));
 
-      //printf("\nlenOfStr %d", lenOfStr);
       for (int i = 0; i < lenOfStr; i++) {
-        int c = code[++ip];
+        int c = code[ip++];
 
         str[i] = (char)c;
       }
@@ -146,6 +165,125 @@ void run(const int *code, int startingAddr, int trace) {
       free(stack[sp + 1]);
       break;
 
+    case JMP: {
+      int jumpAddr = code[ip++];
+
+      if (trace) fprintf(stderr, "%d", jumpAddr);
+
+      // check if addr to jmp to is within the bytecodes given
+      if (jumpAddr >= noOfBytecodes) bail(EINVALIDJMP);
+      ip = jumpAddr;
+      break;
+    }
+
+    case JMPF: {
+      int jumpAddr = code[ip++];
+
+      if (trace) fprintf(stderr, "%d", jumpAddr);
+
+      if (*((int *) stack[sp]) == FALSE) {
+        if (jumpAddr >= noOfBytecodes) bail(EINVALIDJMP);
+        ip = jumpAddr;
+      }
+      break;
+    }
+
+    case JMPT: {
+      int jumpAddr = code[ip++];
+
+      if (trace) fprintf(stderr, "%d", jumpAddr);
+
+      if (*((int *) stack[sp]) == TRUE) {
+        if (jumpAddr >= noOfBytecodes) bail(EINVALIDJMP);
+        ip = jumpAddr;
+      }
+      break;
+    }
+
+    case JMPLT: { // jump if value on stack is lesser than the one given to this instruction
+      int val = *((int *)stack[sp]);
+      int arg = code[ip++];
+      int jumpAddr = code[ip++];
+
+      if (trace) fprintf(stderr, "%d %d", arg, jumpAddr);
+
+      if (val < arg) {
+        if (jumpAddr >= noOfBytecodes) bail(EINVALIDJMP);
+        ip = jumpAddr;
+      }
+      break;
+    }
+
+    case JMPLTE: {
+      int val = *((int *)stack[sp]);
+      int arg = code[ip++];
+      int jumpAddr = code[ip++];
+
+      if (trace) fprintf(stderr, "%d %d", arg, jumpAddr);
+
+      if (val <= arg) {
+        if (jumpAddr >= noOfBytecodes) bail(EINVALIDJMP);
+        ip = jumpAddr;
+      }
+      break;
+    }
+
+    case JMPGT: {
+      int val = *((int *)stack[sp]);
+      int arg = code[ip++];
+      int jumpAddr = code[ip++];
+
+      if (trace) fprintf(stderr, "%d %d", arg, jumpAddr);
+
+      if (val > arg) {
+        if (jumpAddr >= noOfBytecodes) bail(EINVALIDJMP);
+        ip = jumpAddr;
+      }
+      break;
+    }
+
+    case JMPGTE: {
+      int val = *((int *)stack[sp]);
+      int arg = code[ip++];
+      int jumpAddr = code[ip++];
+
+      if (trace) fprintf(stderr, "%d %d", arg, jumpAddr);
+
+      if (val >= arg) {
+        if (jumpAddr >= noOfBytecodes) bail(EINVALIDJMP);
+        ip = jumpAddr;
+      }
+      break;
+    }
+
+    case JMPEQ: {
+      int val = *((int *)stack[sp]);
+      int arg = code[ip++];
+      int jumpAddr = code[ip++];
+
+      if (trace) fprintf(stderr, "%d %d", arg, jumpAddr);
+
+      if (val == arg) {
+        if (jumpAddr >= noOfBytecodes) bail(EINVALIDJMP);
+        ip = jumpAddr;
+      }
+      break;
+    }
+
+    case JMPNE: {
+      int val = *((int *)stack[sp]);
+      int arg = code[ip++];
+      int jumpAddr = code[ip++];
+
+      if (trace) fprintf(stderr, "%d %d", arg, jumpAddr);
+
+      if (val != arg) {
+        if (jumpAddr >= noOfBytecodes) bail(EINVALIDJMP);
+        ip = jumpAddr;
+      }
+      break;
+    }
+
     case HALT:
       if (trace) fprintf(stderr, "\n");
       if (sp != -1) {
@@ -160,9 +298,5 @@ void run(const int *code, int startingAddr, int trace) {
     }
 
     if (trace) fprintf(stderr, "\n");
-
-    // move to next opcode
-    opcode = code[++ip];
-
   }
 }
