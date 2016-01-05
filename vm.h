@@ -44,6 +44,19 @@ enum Instruction {
   HALT      // 21
 };
 
+// new runtime stack structure
+typedef struct RStack {
+  int opcode;
+  union {
+    int i;
+    float f;
+    char* str;
+    // add custom types like classes etc here
+    // they can be other structs (for composite
+    // types like classes, etc)
+  };
+} RStack;
+
 extern const char *ins[];
 
 void run(const int *code, int startingAddr, int trace);
