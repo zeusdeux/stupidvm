@@ -43,7 +43,7 @@ void run(const int *code, int startingAddr, int trace) {
 
   int data[dataSegmentSize];   // arbitrary memory area
   void *stack[MAX_STACK_SIZE]; // runtime stack
-  //  RStack rstack[MAX_STACK_SIZE];
+  //  Op *ops[MAX_STACK_SIZE]; // read bytecode and stick it in there
 
   int sp              = -1;
   int ip              = startingAddr;

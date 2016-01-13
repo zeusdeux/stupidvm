@@ -45,7 +45,7 @@ enum Instruction {
 };
 
 // new runtime stack structure
-typedef struct RStack {
+typedef struct Op {
   int opcode;
   union {
     int i;
@@ -55,7 +55,7 @@ typedef struct RStack {
     // they can be other structs (for composite
     // types like classes, etc)
   };
-} RStack;
+} Op;
 
 extern const char *ins[];
 
