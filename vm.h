@@ -20,6 +20,15 @@
 #define EINVALIDBC "Invalid bytecode file"
 #endif
 
+#ifndef EINVALIDTYPE
+#define EINVALIDTYPE "Invalid data type"
+#endif
+
+#ifndef EINVALIDOPONSTR
+#define EINVALIDOPONSTR "Invalid operation on string"
+#endif
+
+
 enum Instruction {
   INUM = 1, // 1
   IADD,     // 2
@@ -44,29 +53,48 @@ enum Instruction {
   HALT      // 21
 };
 
+enum Type {
+  INT = 1,
+  FLOAT,
+  STRING
+};
 
-typedef union DataType {
-  int i;
-  float f;
-  char *str;
-  // add custom types like classes etc here
-  // they can be other structs (for composite
-  // types like classes, etc)
-} DataType;
+enum Test {
+  UNCOND = 1, // unconditional jump
+  EQ,
+  NEQ,
+  LT,
+  LTE,
+  GT,
+  GTE
+};
+
+typedef struct DataType {
+  enum Type t;
+  union {
+    int i;
+    float f;
+    char *str;
+    // add custom types like classes etc here
+    // they can be other structs (for composite
+    // types like classes, etc)
+  };
+};
+
 
 
 // new runtime stack structure
-typedef struct Instruction {
-  int opcode;
-  DataType val;
-} Instruction;
+/* typedef struct Instruction { */
+/*   int opcode; */
+/*   DataType val; */
+/* } Instruction; */
 
 typedef struct VM {
   DataType stack[MAX_STACK_SIZE];
   const int noOfBytecodes;
   const int *code;
   const int trace;
-  void *data;
+  DataType *data;
   int ip; // instruction pointer
   int sp; // stack pointer
   int fp; // frame pointer
@@ -77,6 +105,22 @@ extern const char *ins[];
 VM initVM(const int *code, const int startingAddr, const int trace);
 void run(VM *vm);
 
-void pushInt(VM *vm);
+int getCurrentByteCodeAndIncIP(VM *vm);
+
+void push(VM *vm, DataType val);
+DataType pop(VM *vm);
+
+void add(VM *vm, enum Type t);
+void mult(VM *vm, enum Type t);
+void subt(VM *vm, enum Type t);
+
+void store(VM *vm, int idx);
+void load(VM *vm, int idx);
+
+void compare(VM *vm, enum Type t); // type dictates comparison algo
+
+// type of test decides jump or not
+// type of value tells type of result pushed by COMPARE onto stack
+void jump(VM *vm, int newIP, enum Test te, enum Type t);
 
 #endif

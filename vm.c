@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 #include "vm.h"
 
 
@@ -59,11 +61,14 @@ VM *initVM(const int *code, const int startingAddr, const int trace) {
   return &vm;
 }
 
-int getCurrentOpCode(VM *vm) {
-  return *vm->code[*vm.ip++];
+int getCurrentByteCodeAndIncIP(VM *vm) {
+  int bc = vm->code[vm->ip];
+
+  vm->ip = vm->ip + 1;
+  return bc;
 }
 
-void pushInt(VM *vm) {
+void push(VM *vm, DataType val) {
   DataType val;
 
   // increment stack pointer to point
@@ -74,21 +79,165 @@ void pushInt(VM *vm) {
   // hence the post increment
   // increment so that ip now points to next
   // bytecode
-  val.i = vm->code[vm->ip++];
   vm->stack[vm->sp] = val;
 }
 
+
+DataType pop(VM *vm) {
+  return vm->stack[vm->sp--];
+}
+
+void add(VM *vm, enum Type t) {
+  DataType y = pop(vm);
+  DataType x = pop(vm);
+  DataType sum;
+
+  sum.t = t;
+
+  switch(t) {
+  case INT: sum.i = x.i + y.i;
+    break;
+  case FLOAT: sum.f = x.f + y.f;
+    break;
+  case STRING: strcat(x.str, y.str);
+    sum.str = x.str;
+    break;
+  default: bail(EINVALIDTYPE);
+    break;
+  }
+  push(vm, sum);
+}
+
+void mult(VM *vm, enum Type t) {
+  DataType y = pop(vm);
+  DataType x = pop(vm);
+  DataType product;
+
+  product.t = t;
+
+  switch(t) {
+  case INT: product.i = x.i * y.i;
+    break;
+  case FLOAT: product.f = x.f * y.f;
+    break;
+  case STRING: bail(EINVALIDOPONSTR);
+    break;
+  default: bail(EINVALIDTYPE);
+    break;
+  }
+  push(vm, product);
+}
+
+void subt(VM *vm, enum Type t) {
+  DataType y = pop(vm);
+  DataType x = pop(vm);
+  DataType difference;
+
+  difference.t = t;
+
+  switch(t) {
+  case INT: difference.i = x.i - y.i;
+    break;
+  case FLOAT: difference.f = x.f - y.f;
+    break;
+  case STRING: bail(EINVALIDOPONSTR);
+    break;
+  default: bail(EINVALIDTYPE);
+    break;
+  }
+  push(vm, difference);
+}
+
+void store(VM *vm, int idx) {
+  vm->data[idx] = pop(vm);
+}
+
+void load(VM *vm, int idx) {
+  push(vm, vm->data[idx]);
+}
+
+// type dictates comparison algo
+void compare(VM *vm, enum Type t) {
+  switch(t) {
+  case INT:
+  case FLOAT: subt(vm, t);
+    break;
+  case STRING:
+    DataType a = pop(vm);
+    DataType b = pop(vm);
+    DataType c;
+
+    c.t = INT;
+    c.i = strcmp(a.str, b,str);
+    push(vm, c);
+    break;
+  default: bail(EINVALIDTYPE);
+    break;
+  }
+}
+
+// type of test decides jump or not
+void jump(VM *vm, int newIP, enum Test te, enum Type t) {
+  DataType topOfStack = pop(vm);
+  int cmpVal;
+
+  switch(t) {
+  case INT:
+  case STRING:
+    cmpVal = topOfStack.i;
+    break;
+  case FLOAT:
+    cmpVal = topOfStack.f < 0 ? -1 : (topOfStack.f == 0 ? 0 : 1);
+    break;
+  default: bail(EINVALIDTYPE);
+  }
+
+
+}
+
+
 void run(VM *vm) {
   while (vm->ip < vm->noOfBytecodes) {
-    int opcode = getCurrentOpCode(&vm);
+    int opcode = getCurrentByteCodeAndIncIP(&vm);
+    DataType x;
+    int idx, strLength;
 
     if (vm->trace) {
-      fprintf(stderr, "%04d: %s\t", ip - 1, ins[opcode]);
+      fprintf(stderr, "%04d: %s\t", vm->ip - 1, ins[opcode]);
     }
 
     // decode & execute
     switch(opcode) {
-    case INUM: pushInt(&vm);
+    case INUM:
+      x.t = INT;
+      x.i = getCurrentByteCodeAndIncIP(&vm);
+      push(&vm, x);
+      break;
+    case IADD: add(&vm, INT);
+      break;
+    case IMUL: mult(&vm, INT);
+      break;
+    case ISTORE:
+      idx = getCurrentByteCodeAndIncIP(&vm);
+      store(&vm, idx);
+      break;
+    case ILOAD:
+      idx = getCurrentByteCodeAndIncIP(&vm);
+      load(&vm, idx);
+      break;
+    case STR:
+      strLength = getCurrentByteCodeAndIncIP(&vm);
+      x.t = STRING;
+      x.str = malloc(lenOfStr * sizeof(char));
+
+      // copy char by char
+      // XXX: Look into just copy strLength bytes
+      // onto x.str using mmap or some cpy function
+      for (i = 0; i < strLength; i++) x.str[i] = (char)getCurrentByteCodeAndIncIP(&vm);
+      push(&vm, x);
+      break;
+    case POP:
+      pop(&vm);
       break;
 
     }
