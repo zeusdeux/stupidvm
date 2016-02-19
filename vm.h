@@ -44,21 +44,39 @@ enum Instruction {
   HALT      // 21
 };
 
+
+typedef union DataType {
+  int i;
+  float f;
+  char *str;
+  // add custom types like classes etc here
+  // they can be other structs (for composite
+  // types like classes, etc)
+} DataType;
+
+
 // new runtime stack structure
-typedef struct Op {
+typedef struct Instruction {
   int opcode;
-  union {
-    int i;
-    float f;
-    char* str;
-    // add custom types like classes etc here
-    // they can be other structs (for composite
-    // types like classes, etc)
-  };
-} Op;
+  DataType val;
+} Instruction;
+
+typedef struct VM {
+  DataType stack[MAX_STACK_SIZE];
+  const int noOfBytecodes;
+  const int *code;
+  const int trace;
+  void *data;
+  int ip; // instruction pointer
+  int sp; // stack pointer
+  int fp; // frame pointer
+} VM;
 
 extern const char *ins[];
 
-void run(const int *code, int startingAddr, int trace);
+VM initVM(const int *code, const int startingAddr, const int trace);
+void run(VM *vm);
+
+void pushInt(VM *vm);
 
 #endif

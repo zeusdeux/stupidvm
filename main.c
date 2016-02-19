@@ -47,6 +47,7 @@ const int code2[] = {STUPIDVMMARKER,
                      HALT};
 
 int main(int args, char **argv) {
-  run(code2, 3, argv[1] || 0); // pass 1 as first arg to see disassembly
+  VM vm = initVM(code2, 3, argv[1] || 0); // pass 1 as first arg to see disassembly
+  run(&vm);
   return 0;
 }

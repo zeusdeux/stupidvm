@@ -34,7 +34,68 @@ void bail(const char *error) {
   exit(1);
 }
 
-void run(const int *code, int startingAddr, int trace) {
+VM *initVM(const int *code, const int startingAddr, const int trace) {
+  VM vm; // = malloc(sizeof(VM));
+  const int noOfBytecodes   = code[1];
+  const int dataSegmentSize = code[2];
+
+  if (code[0] != STUPIDVMMARKER) bail(EINVALIDBC);
+
+  if (trace) {
+    fprintf(stderr, "No., of bytecodes: %d\n\n", noOfBytecodes);
+    fprintf(stderr, "ADDR: OPCODE\tARGS\n--------------------\n");
+  }
+
+  vm.sp = -1;
+  vm.fp = -1;
+  vm.ip = startingAddr;
+
+  vm.trace = trace;
+  vm.noOfBytecodes = noOfBytecodes;
+
+  vm.code = code;
+  vm.data = malloc(sizeof(DataType)*dataSegmentSize);
+
+  return &vm;
+}
+
+int getCurrentOpCode(VM *vm) {
+  return *vm->code[*vm.ip++];
+}
+
+void pushInt(VM *vm) {
+  DataType val;
+
+  // increment stack pointer to point
+  // to next empty slot
+  vm->sp = vm->sp + 1;
+
+  // ip already incremented by getCurrentOpCode
+  // hence the post increment
+  // increment so that ip now points to next
+  // bytecode
+  val.i = vm->code[vm->ip++];
+  vm->stack[vm->sp] = val;
+}
+
+void run(VM *vm) {
+  while (vm->ip < vm->noOfBytecodes) {
+    int opcode = getCurrentOpCode(&vm);
+
+    if (vm->trace) {
+      fprintf(stderr, "%04d: %s\t", ip - 1, ins[opcode]);
+    }
+
+    // decode & execute
+    switch(opcode) {
+    case INUM: pushInt(&vm);
+      break;
+
+    }
+  }
+}
+
+void run1(const int *code, int startingAddr, int trace) {
 
   if (code[0] != STUPIDVMMARKER) bail(EINVALIDBC);
 
