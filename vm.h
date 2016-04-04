@@ -28,6 +28,9 @@
 #define EINVALIDOPONSTR "Invalid operation on string"
 #endif
 
+#ifndef EINVALIDJMP
+#define EINVALIDJMP "Invalid jump operation"
+#endif
 
 enum Instruction {
   INUM = 1, // 1
@@ -121,6 +124,6 @@ void compare(VM *vm, enum Type t); // type dictates comparison algo
 
 // type of test decides jump or not
 // type of value tells type of result pushed by COMPARE onto stack
-void jump(VM *vm, int newIP, enum Test te, enum Type t);
+void jump(VM *vm, enum Test te, int newIP, enum Type t);
 
 #endif

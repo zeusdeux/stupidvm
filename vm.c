@@ -69,8 +69,6 @@ int getCurrentByteCodeAndIncIP(VM *vm) {
 }
 
 void push(VM *vm, DataType val) {
-  DataType val;
-
   // increment stack pointer to point
   // to next empty slot
   vm->sp = vm->sp + 1;
@@ -177,7 +175,10 @@ void compare(VM *vm, enum Type t) {
 }
 
 // type of test decides jump or not
-void jump(VM *vm, int newIP, enum Test te, enum Type t) {
+// jumps like LT, EQ, etc, have to use compare from above
+// thus they have to push onto stack what they want
+// to compare against
+void jump(VM *vm, enum Test te, int newIP, enum Type t) {
   DataType topOfStack = pop(vm);
   int cmpVal;
 
@@ -192,7 +193,30 @@ void jump(VM *vm, int newIP, enum Test te, enum Type t) {
   default: bail(EINVALIDTYPE);
   }
 
-
+  switch(te) {
+  case UNCOND:
+    vm->ip = newIP;
+    break;
+  case EQ:
+    if (cmpVal == 0) vm->ip = newIP;
+    break;
+  case NEQ:
+    if (cmpVal != 0) vm->ip = newIP;
+    break;
+  case LT:
+    if (cmpVal < 0) vm->ip = newIP;
+    break;
+  case LTE:
+    if (cmpVal <= 0) vm->ip = newIP;
+    break;
+  case LT:
+    if (cmpVal < 0) vm->ip = newIP;
+    break;
+  case LTE:
+    if (cmpVal <= 0) vm->ip = newIP;
+    break;
+  default: bail(EINVALIDJMP);
+  }
 }
 
 
