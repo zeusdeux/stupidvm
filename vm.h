@@ -1,64 +1,43 @@
 #ifndef VM_H_
 #define VM_H_
 
-#define STUPIDVMMARKER 0xB055BABE
-#define MAX_STACK_SIZE 1000
+#include <stdlib.h>
 
-#ifndef TRUE
-#define TRUE 1
+#define MAX_STACK_SIZE 1024
+#define bail(...) {                                       \
+    fprintf (stderr, "%s:%d: ", __FILE__, __LINE__);      \
+    fprintf (stderr, __VA_ARGS__);                        \
+    fprintf (stderr, "\n");                               \
+    exit(1);                                              \
+  }
+
+#ifdef VM_TRACE_ENABLE
+#define dbg(...) {                                        \
+    fprintf (stderr, "%s:%d: ", __FILE__, __LINE__);      \
+    fprintf (stderr, __VA_ARGS__);                        \
+    fprintf (stderr, "\n");                               \
+  }
+#else
+#define dbg(...) {}
 #endif
 
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#ifndef EINVALIDJMP
-#define EINVALIDJMP "Invalid address to jump to"
-#endif
-
-#ifndef EINVALIDBC
-#define EINVALIDBC "Invalid bytecode file"
-#endif
-
-enum Instruction {
-  INUM = 1, // 1
-  IADD,     // 2
-  IMUL,     // 3
-  ISTORE,   // 4
-  ILOAD,    // 5
-  STR,      // 6
-  POP,      // 7
-  IPRINT,   // 8
-  IPRINTLN, // 9
-  SPRINT,   // 10
-  SPRINTLN, // 11
-  JMP,      // 12
-  JMPF,     // 13
-  JMPT,     // 14
-  JMPLT,    // 15
-  JMPLTE,   // 16
-  JMPGT,    // 17
-  JMPGTE,   // 18
-  JMPEQ,    // 19
-  JMPNE,    // 20
-  HALT      // 21
-};
-
-// new runtime stack structure
-typedef struct Op {
-  int opcode;
-  union {
-    int i;
-    float f;
-    char* str;
-    // add custom types like classes etc here
-    // they can be other structs (for composite
-    // types like classes, etc)
-  };
+typedef enum {
+  HALT = 0,
+  PUSH,
+  IADD,
+  PRINT,
+  STORE,
+  LOAD,
 } Op;
 
-extern const char *ins[];
+typedef struct {
+  Op opcode;
+  union {
+    int i_val;
+    float f_val;
+  };
+} Instruction;
 
-void run(const int *code, int startingAddr, int trace);
+void run(const int program[]);
 
-#endif
+#endif // VM_H_
