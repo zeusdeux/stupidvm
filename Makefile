@@ -11,6 +11,10 @@ all: run
 # vm.o: vm.c vm.h
 # 	@clang $(FLAGS) -c vm.c
 
+foo2:
+	@clang -g $(FLAGS) foo2.c -o foo2
+	@./foo2
+
 foo:
 	@clang -g $(FLAGS) -c foo.c # generate foo.o
 	@clang -g $(FLAGS) foo.o -o foo
@@ -26,11 +30,11 @@ debug:
 	@objdump -S ./main-debug > ./main-debug.deassm
 
 help:
-	@echo "make <run, debug, foo, help, clean>"
+	@echo "make <run, debug, foo, foo2, help, clean>"
 
 clean:
 	$(RM) ./*.o ./*.dump ./*.deassm
 	$(RM) -r ./*.dSYM
-	$(RM) ./main ./foo ./main-debug
+	$(RM) ./main ./foo ./foo2 ./main-debug
 
-.PHONY: all run debug foo clean help
+.PHONY: all run debug foo foo2 clean help
