@@ -78,7 +78,7 @@ void vec_resize_(Vec *vec)
   dbg_vec_ptr("vec_resize_:output>", vec);
 }
 
-#define vec_create(...) vec_create_((__VA_ARGS__), sizeof((__VA_ARGS__)), sizeof((__VA_ARGS__[0])))
+#define vec_create(...) vec_create_((__VA_ARGS__), (__VA_ARGS__) == NULL ? 0 : sizeof((__VA_ARGS__)), (__VA_ARGS__) == NULL ? 0 : sizeof((__VA_ARGS__[0])))
 Vec vec_create_(void *arr, size_t orig_capacity, size_t element_sz)
 {
   dbg("vec_create:input>"
@@ -92,13 +92,10 @@ Vec vec_create_(void *arr, size_t orig_capacity, size_t element_sz)
   size_t length;
   size_t capacity;
 
-  if (arr == NULL) {
-    length = 0;
-    capacity = MIN_CAPACITY(4); // assuming user wants to treat vec.data as int[] when init-ing a vector with NULL
-  } else {
-    length = orig_capacity / element_sz;
-    capacity = orig_capacity < MIN_CAPACITY(element_sz) ? MIN_CAPACITY(element_sz) : orig_capacity;
-  }
+  element_sz = element_sz ? element_sz : 4;
+  orig_capacity = orig_capacity ? orig_capacity : MIN_CAPACITY(4);
+  length = arr == NULL ? 0 : orig_capacity / element_sz;
+  capacity = orig_capacity < MIN_CAPACITY(element_sz) ? MIN_CAPACITY(element_sz) : orig_capacity;
 
   // allocate contigous bytes, zeroed out
   void *data = calloc(capacity, 1);
