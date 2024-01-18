@@ -1,7 +1,6 @@
 #include <stdio.h>
 
-#define VEC_IMPLEMENTATION
-#include "vec.h"
+#include "indirect_libs_include.h"
 
 /* #define test(...) broski((__VA_ARGS__), (__VA_ARGS__) == NULL ? 0 : "omg") */
 
@@ -14,7 +13,7 @@ int main(void)
 
 
   Vec v1 = vec_create(NULL);
-  Vec v2 = vec_create((char []){0});
+  /* Vec v2 = vec_create((char []){0}); */
 
   // this does 3 stack allocation for {1, 2, 3} due to how
   // vec_create macro is written unfortunately
@@ -29,10 +28,13 @@ int main(void)
     printf("33333333\ndata[0] %d\ndata[1] %d\ndata[2] %d\ndata[3] %d\ndata[4] %d\ndata[5] %d\nvec length %zu\n",
            a[0], a[1], a[2], a[3], a[4], a[5], v3.length);
 
+
+    /* vec_ */
+
   }
 
   vec_free(v1);
-  vec_free(v2);
+  /* vec_free(v2); */
   vec_free(v3);
 
   return 0;
