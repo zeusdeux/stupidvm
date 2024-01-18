@@ -3,14 +3,13 @@
 #include "vm.h"
 
 // With tracing
-// gcc -DVM_TRACE_ENABLE -std=c17 -Wall -pedantic -Wdeprecated -Wextra vm.c main.c -o ./vm
+// gcc -DZDX_TRACE_ENABLE -std=c17 -Wall -pedantic -Wdeprecated -Wextra vm.c main.c -o ./vm
 // Without tracing
 // gcc -std=c17 -Wall -pedantic -Wdeprecated -Wextra vm.c main.c -o ./vm
 int main(void)
 {
   const int program[] = {
     12,
-    0,
     PUSH, 10,
     PUSH, 20,
     IADD, // 30
