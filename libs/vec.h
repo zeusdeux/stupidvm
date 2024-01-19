@@ -66,7 +66,7 @@ typedef struct Vec {
 
 void vec_resize_(Vec *vec)
 {
-  dbg_vec_ptr("vec_resize_:input>", vec);
+  dbg_vec_ptr("input:", vec);
 
   if (vec == NULL || vec->capacity == 0) {
     // TODO: panic or fail silently or log to stderr and recover?
@@ -80,17 +80,17 @@ void vec_resize_(Vec *vec)
     vec->data = resized_data_ptr;
     vec->capacity = new_capacity;
   } else {
-    dbg("Vec:Error> Vector resize failed. %s\n", strerror(errno));
+    log(L_ERROR, "Vector resize failed. %s\n", strerror(errno));
     vec->valid = false;
   }
 
-  dbg_vec_ptr("vec_resize_:output>", vec);
+  dbg_vec_ptr("output:", vec);
 }
 
 #define vec_create(...) vec_create_((__VA_ARGS__), (__VA_ARGS__) == NULL ? 0 : sizeof((__VA_ARGS__)), (__VA_ARGS__) == NULL ? 0 : sizeof((__VA_ARGS__[0])))
 Vec vec_create_(void *arr, size_t orig_capacity, size_t element_sz)
 {
-  dbg("vec_create:input>"
+  dbg("input:"
       "\tarr ptr %p"
       "\tarr capacity (bytes) %zu"
       "\telement size (bytes) %zu",
@@ -121,7 +121,7 @@ Vec vec_create_(void *arr, size_t orig_capacity, size_t element_sz)
 
 
   if (!res.valid) {
-    dbg_vec("vec_create:output>", res);
+    dbg_vec("output:", res);
     return res;
   }
 
@@ -140,7 +140,7 @@ Vec vec_create_(void *arr, size_t orig_capacity, size_t element_sz)
     }
   }
 
-  dbg_vec("vec_create:output>", res);
+  dbg_vec("output:", res);
 
   return res;
 }
@@ -177,8 +177,8 @@ void vec_free(Vec vec)
 
 Vec *vec_push_(Vec *vec, void *els, size_t reqd_capacity)
 {
-  dbg_vec_ptr("vec_push:input>", vec);
-  dbg("vec_push:input>\telement ptr %p\trequired capacity %zu", els, reqd_capacity);
+  dbg_vec_ptr("input:", vec);
+  dbg("input:\telement ptr %p\trequired capacity %zu", els, reqd_capacity);
 
   assert(reqd_capacity % vec->element_sz == 0 && "vec_push> Type of element being pushed doesn't match vector type");
 
@@ -186,14 +186,15 @@ Vec *vec_push_(Vec *vec, void *els, size_t reqd_capacity)
     size_t last_item_offset = vec->length * vec->element_sz;
     size_t remaining_capacity = vec->capacity - last_item_offset;
 
-    dbg("vec_push:input>\toffset of last vec item %zu\tremaining capacity in vec %zu\n", last_item_offset, remaining_capacity);
+    dbg("input:\toffset of last vec item %zu\tremaining capacity in vec %zu\n", last_item_offset, remaining_capacity);
 
 
     if (reqd_capacity > remaining_capacity) {
       vec_resize_(vec);
 
       if (!vec->valid) {
-        dbg_vec_ptr("vec_push:error> Invalid vector", vec);
+        dbg_vec_ptr("error: Invalid vector", vec);
+        log(L_ERROR, "Invalid vector");
         return vec;
       }
     }
@@ -212,7 +213,7 @@ Vec *vec_push_(Vec *vec, void *els, size_t reqd_capacity)
 
     vec->length += reqd_capacity / vec->element_sz;
   } else {
-    dbg("vec_push:input>Invalid vector");
+    log(L_ERROR, "Invalid vector");
   }
   return vec;
 }
