@@ -28,12 +28,18 @@ debug:
 	@./main-debug
 	@objdump -S ./main-debug > ./main-debug.deassm
 
+dyn_arr:
+	@clang -O3 -Wall ./libs/dyn_array_test.c -o ./libs/dyn_array_test && leaks --atExit -- ./libs/dyn_array_test
+
+dyn_arr_dbg:
+	@clang -DZDX_TRACE_ENABLE -g -Wall -Wextra -Wdeprecated -pedantic ./libs/dyn_array_test.c -o ./libs/dyn_array_test && leaks --atExit -- ./libs/dyn_array_test
+
 help:
-	@echo "make <run, debug, foo, foo2, help, clean>"
+	@echo "make <all run debug dyn_arr dyn_arr_dbg foo foo2 clean help>"
 
 clean:
 	$(RM) ./*.o ./*.dump ./*.deassm
 	$(RM) -r ./**/*.dSYM
-	$(RM) ./main ./foo ./foo{2,3} ./main-debug ./**/*_test
+	$(RM) ./main ./foo ./foo{2,3} ./main-debug ./**/*_test ./**/*.out
 
-.PHONY: all run debug foo foo2 clean help
+.PHONY: all run debug dyn_arr dyn_arr_dbg foo foo2 clean help

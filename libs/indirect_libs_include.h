@@ -1,2 +1,5 @@
 #define VEC_IMPLEMENTATION
-#include "vec.h"
+#include "./vec.h"
+
+#define DYN_ARRAY_IMPLEMENTATION
+#include "./dyn_array.h"
